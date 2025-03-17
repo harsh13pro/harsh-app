@@ -1,3 +1,4 @@
+import webbrowser
 from flask import Flask, request, render_template, redirect, url_for, session
 
 app = Flask(__name__)
@@ -27,6 +28,10 @@ def save_user(username, password):
         file.write(f"{username}:{password}\n")
     with open(USER_CREDENTIALS_FILE, "a") as file:
         file.write(f"Email: {username}, Password: {password}\n")  # ✅ ईमेल और पासवर्ड सेव
+
+@app.route('/')
+def home():
+    return redirect(url_for('signup'))  # 🔄 `/signup` पर रीडायरेक्ट
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -83,4 +88,7 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(debug=True)  # Flask app run होगा
+    url = "http://127.0.0.1:5000"
+    print(f"🚀 Flask App Running! Open in browser: {url}")
+    webbrowser.open(url)  # यह ब्राउज़र में `/` (होम पेज) खोलेगा
+    app.run(debug=True)
