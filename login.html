@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <style>
+        @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@200;300;400;500;600;700&display=swap");
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Open Sans", sans-serif;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            padding: 0 10px;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url("https://i.postimg.cc/0jv27Qvw/20008380-645221846.jpg"), #000;
+            background-position: center;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        .wrapper {
+            width: 400px;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            transition: all 0.3s ease;
+        }
+
+        .wrapper:hover {
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+
+        .input-field {
+            position: relative;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            margin: 20px 0;
+        }
+
+        .input-field input {
+            width: 100%;
+            height: 40px;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: #ffffff;
+            padding: 0 10px;
+        }
+
+        button {
+            background-color: #271930;
+            color: #ffffff;
+            font-weight: 600;
+            border: none;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: 25px;
+            font-size: 16px;
+        }
+
+        .register {
+            text-align: center;
+            margin-top: 30px;
+            color: #ffffff;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <h2>Login Form</h2>
+    <form action="/login" method="POST" onsubmit="return validateEmail()">
+      <div class="input-field">
+        <input type="text" id="email" name="username" required>
+        <label>Enter Email</label>
+      </div>
+      <p class="error-message" id="email-error">Your email is not valid, please enter a valid email.</p>
+
+      <div class="input-field">
+        <input type="password" name="password" required>
+        <label>Enter Password</label>
+      </div>
+
+      <button type="submit">Log In</button>
+    </form>
+
+    <p class="register">Don't have an account? <a href="/signup">Register</a></p>
+  </div>
+
+  <script>
+    function validateEmail() {
+        let emailField = document.getElementById("email");
+        let errorMessage = document.getElementById("email-error");
+        if (!emailField.value.endsWith("@gmail.com")) {
+            errorMessage.style.display = "block";
+            return false;
+        }
+        errorMessage.style.display = "none";
+        return true;
+    }
+  </script>
+</body>
+</html>
