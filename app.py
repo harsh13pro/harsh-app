@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=os.path.abspath('templates'))
 app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')  # Render के लिए Secret Key
 
 # ✅ फाइलें अगर मौजूद नहीं हैं, तो क्रिएट करें
