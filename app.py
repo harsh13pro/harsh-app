@@ -1,21 +1,18 @@
 import os
-import webbrowser
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')  # Render में .env से Key लें
+app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')  # Render के लिए Secret Key
 
-# Users और Credentials स्टोर करने के लिए फाइल्स
+# ✅ फाइलें अगर मौजूद नहीं हैं, तो क्रिएट करें
 USER_FILE = "users.txt"
 USER_CREDENTIALS_FILE = "user_credentials.txt"
-
-# 🔹 अगर फाइलें नहीं हैं, तो उन्हें Create करें
 for file in [USER_FILE, USER_CREDENTIALS_FILE]:
     if not os.path.exists(file):
         with open(file, "w") as f:
             pass  # खाली फाइल बनाएँ
 
-# 🔹 Function to read users from file
+# ✅ फ़ाइल से Users पढ़ने का Function
 def load_users():
     users = {}
     try:
@@ -29,7 +26,7 @@ def load_users():
         print(f"Error reading {USER_FILE}: {e}")
     return users
 
-# 🔹 Function to save a new user
+# ✅ Users को Save करने का Function
 def save_user(username, password):
     try:
         with open(USER_FILE, "a") as file:
@@ -39,16 +36,22 @@ def save_user(username, password):
     except Exception as e:
         print(f"Error saving user: {e}")
 
-# 🔹 Root Route (Redirect to /signup)
-@app.route('/')
+# ✅ `/` Route (HEAD और GET दोनों सपोर्ट)
+@app.route('/', methods=['GET', 'HEAD'])
 def home():
-    return render_template('signup.html')  # ✅ यह सही है!
-# 🔹 Signup Route
+    if request.method == 'HEAD':
+        return '', 200  # ✅ HEAD रिक्वेस्ट को हैंडल करें
+    return redirect(url_for('signup'))  # ✅ `/signup` पर रीडायरेक्ट
+
+# ✅ Signup Route
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+
+        if not username or not password:
+            return "Username and password are required."
 
         users = load_users()
         if username in users:
@@ -59,7 +62,7 @@ def signup():
 
     return render_template('signup.html')
 
-# 🔹 Login Route
+# ✅ Login Route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -67,7 +70,6 @@ def login():
         password = request.form.get('password')
 
         users = load_users()
-
         if username in users and users[username] == password:
             session['user'] = username
             return redirect(url_for('upload'))
@@ -76,7 +78,7 @@ def login():
 
     return render_template('login.html')
 
-# 🔹 Upload Route
+# ✅ Upload Route (User को Authenticated होना चाहिए)
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if 'user' not in session:
@@ -94,19 +96,12 @@ def upload():
 
     return render_template('upload.html')
 
-# 🔹 Logout Route
+# ✅ Logout Route
 @app.route('/logout')
 def logout():
     session.pop('user', None)
     return redirect(url_for('login'))
 
-# 🔹 Flask App Run करें
+# ✅ Flask App Run करें
 if __name__ == '__main__':
-    url = "http://127.0.0.1:5000"
-    print(f"🚀 Flask App Running! Open in browser: {url}")
-
-   
-    if os.environ.get("RENDER") is None:
-        webbrowser.open(url)
-
-        app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 10000)), debug=True)
