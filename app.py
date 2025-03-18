@@ -110,4 +110,4 @@ if __name__ == '__main__':
     if os.environ.get("RENDER") is None:
         webbrowser.open(url)
 
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
+      app.run(host='0.0.0.0', port=10000, debug=True)  # ✅ Render सही Port पर रन करे
