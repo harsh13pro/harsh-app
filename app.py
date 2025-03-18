@@ -41,7 +41,7 @@ def save_user(username, password):
 def home():
     if request.method == 'HEAD':
         return '', 200  # ✅ HEAD रिक्वेस्ट को हैंडल करें
-    return redirect(url_for('login'))  # ✅ `/signup` पर रीडायरेक्ट
+    return redirect(url_for('signup'))  # ✅ `/signup` पर रीडायरेक्ट
 
 # ✅ Signup Route
 @app.route('/signup', methods=['GET', 'POST'])
