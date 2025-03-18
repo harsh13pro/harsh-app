@@ -106,8 +106,8 @@ if __name__ == '__main__':
     url = "http://127.0.0.1:5000"
     print(f"🚀 Flask App Running! Open in browser: {url}")
 
-    # ✅ लोकल रनिंग के लिए ब्राउज़र खोलें, लेकिन Render पर नहीं
+   
     if os.environ.get("RENDER") is None:
         webbrowser.open(url)
 
-      app.run(host='0.0.0.0', port=10000, debug=True)  # ✅ Render सही Port पर रन करे
+      app.run(host='0.0.0.0', port=10000, debug=True)  
