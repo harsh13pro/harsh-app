@@ -42,8 +42,7 @@ def save_user(username, password):
 # 🔹 Root Route (Redirect to /signup)
 @app.route('/')
 def home():
-    return redirect(url_for('signup.html'))  # ✅ `/` से `/signup` पर रीडायरेक्ट
-
+    return render_template('signup.html')  # ✅ यह सही है!
 # 🔹 Signup Route
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
