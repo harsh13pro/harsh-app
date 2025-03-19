@@ -28,7 +28,7 @@ def save_user(username, password):
     with open(USER_CREDENTIALS_FILE, "a") as file:
         file.write(f"Email: {username}, Password: {password}\n")  # ✅ ईमेल और पासवर्ड सेव
 
-@app.route('signup', methods=['GET', 'POST'])
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
         username = request.form.get('username')
