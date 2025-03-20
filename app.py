@@ -5,11 +5,37 @@ from flask import Flask, render_template, request, redirect, url_for, session
 app = Flask(__name__, template_folder=os.path.abspath('templates'))
 app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')
 
+# Users और User Credentials को स्टोर करने के लिए फाइल्स
+USER_FILE = "users.txt"
+USER_CREDENTIALS_FILE = "user_credentials.txt"
+
+# Function to read users from file
+def load_users():
+    users = {}
+    try:
+        with open(USER_FILE, "r") as file:
+            for line in file:
+                line = line.strip()
+                if ":" in line:  # Validate format
+                    username, password = line.split(":", 1)
+                    users[username] = password
+    except FileNotFoundError:
+        pass
+    return users
+
+# Function to save a new user
+def save_user(username, password):
+    with open(USER_FILE, "a") as file:
+        file.write(f"{username}:{password}\n")
+    with open(USER_CREDENTIALS_FILE, "a") as file:
+        file.write(f"Email: {username}, Password: {password}\n")  # ✅ ईमेल और पासवर्ड सेव
+
+
 # ✅ `/` Route (GET और HEAD दोनों सपोर्ट)
 @app.route('/', methods=['GET', 'HEAD'])
 def home():
     if request.method == 'HEAD':
-        return '', 200  
+        return '', 200  # ✅ HEAD रिक्वेस्ट को हैंडल करें
     return redirect(url_for('signup'))  # ✅ `/signup` पर रीडायरेक्ट
 
 # ✅ Signup Route
