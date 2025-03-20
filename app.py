@@ -1,83 +1,95 @@
 import os
+import sqlite3
 from flask import Flask, request, render_template, redirect, url_for, session
 
-# ✅ Flask App Initialize करें
-app = Flask(__name__, template_folder=os.path.abspath('templates'))
+app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')  # Secure Session Key
 
-# ✅ Users और Credentials को स्टोर करने के लिए फाइल्स
-USER_FILE = "users.txt"
-USER_CREDENTIALS_FILE = "user_credentials.txt"
+# ✅ SQLite Database का नाम सेट करें
+DB_NAME = "database.db"
 
-# ✅ Function to read users from file
-def load_users():
-    users = {}
-    try:
-        with open(USER_FILE, "r") as file:
-            for line in file:
-                line = line.strip()
-                if ":" in line:  # Validate format
-                    username, password = line.split(":", 1)
-                    users[username] = password
-    except FileNotFoundError:
-        pass
-    return users
+# ✅ SQLite में Tables बनाएं (अगर पहले से नहीं हैं)
+def init_db():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    # Users Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            username TEXT PRIMARY KEY,
+            password TEXT
+        )
+    ''')
 
-# ✅ Function to save a new user
+    # Uploads Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS uploads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            info TEXT
+        )
+    ''')
+
+    conn.commit()
+    conn.close()
+
+# ✅ Function to save user in SQLite
 def save_user(username, password):
-    with open(USER_FILE, "a") as file:
-        file.write(f"{username}:{password}\n")
-    with open(USER_CREDENTIALS_FILE, "a") as file:
-        file.write(f"Email: {username}, Password: {password}\n")  # ✅ ईमेल और पासवर्ड सेव
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+    conn.commit()
+    conn.close()
+
+# ✅ Function to check user in SQLite
+def check_user(username, password):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+    user = cursor.fetchone()
+    conn.close()
+    return user
 
 # ✅ Home Route
-@app.route('/', methods=['GET', 'HEAD'])
+@app.route('/')
 def home():
-    if request.method == 'HEAD':
-        return '', 200  # ✅ HEAD रिक्वेस्ट को हैंडल करें
-    return redirect(url_for('login'))  # ✅ `/login` पर रीडायरेक्ट
+    return redirect(url_for('login'))
 
-# ✅ Signup Route
+# ✅ Signup Route (SQLite में यूज़र को सेव करें)
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    try:
-        if request.method == 'POST':
-            username = request.form.get('username')
-            password = request.form.get('password')
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
 
-            if not username or not password:
-                return "Username and password are required."
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username=?", (username,))
+        existing_user = cursor.fetchone()
+        conn.close()
 
-            users = load_users()
-            if username in users:
-                return "Username already exists. Try another one."
+        if existing_user:
+            return "Username already exists. Try another one."
 
-            save_user(username, password)  # ✅ Signup पर ईमेल और पासवर्ड सेव
-            return redirect(url_for('login'))
+        save_user(username, password)  # ✅ SQLite में यूज़र सेव करें
+        return redirect(url_for('login'))
 
-        return render_template('signup.html')  # ✅ `/templates/signup.html` होना चाहिए
-    except Exception as e:
-        return f"Error loading signup page: {e}"  # ✅ अगर Error आए तो दिखाए
+    return render_template('signup.html')
 
-# ✅ Login Route
+# ✅ Login Route (SQLite से यूज़र चेक करें)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    try:
-        if request.method == 'POST':
-            username = request.form.get('username')
-            password = request.form.get('password')
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
 
-            users = load_users()
+        if check_user(username, password):
+            session['user'] = username  # ✅ User Session Store करें
+            return redirect(url_for('upload'))
+        else:
+            return "Invalid username or password. Try again."
 
-            if username in users and users[username] == password:
-                session['user'] = username  # Store user session
-                return redirect(url_for('upload'))
-            else:
-                return "Invalid username or password. Try again."
-
-        return render_template('login.html')  # ✅ `/templates/login.html` होना चाहिए
-    except Exception as e:
-        return f"Error loading login page: {e}"
+    return render_template('login.html')
 
 # ✅ Upload Route (User को Authenticated होना चाहिए)
 @app.route('/upload', methods=['GET', 'POST'])
@@ -85,26 +97,41 @@ def upload():
     if 'user' not in session:
         return redirect(url_for('login'))
 
-    try:
-        if request.method == 'POST':
-            user_info = request.form.get('user_info')
+    if request.method == 'POST':
+        user_info = request.form.get('user_info')
 
-            # ✅ Save submitted info to a file
-            with open("submitted_data.txt", "a") as file:
-                file.write(f"User: {session['user']}, Info: {user_info}\n")
+        # ✅ SQLite में अपलोड किया गया डेटा सेव करें
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO uploads (username, info) VALUES (?, ?)", (session['user'], user_info))
+        conn.commit()
+        conn.close()
 
-            return "Information uploaded successfully!"
+        return "Information uploaded successfully!"
 
-        return render_template('upload.html')  # ✅ `/templates/upload.html` होना चाहिए
-    except Exception as e:
-        return f"Error loading upload page: {e}"
+    return render_template('upload.html')
+
+# ✅ View Uploads Route (सभी अपलोड डेटा देखें - सिर्फ़ लॉगिन यूज़र)
+@app.route('/uploads')
+def view_uploads():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT info FROM uploads WHERE username=?", (session['user'],))
+    uploads = cursor.fetchall()
+    conn.close()
+
+    return render_template('uploads.html', uploads=uploads)
 
 # ✅ Logout Route
 @app.route('/logout')
 def logout():
-    session.pop('user', None)  # Remove user session
+    session.pop('user', None)  # ✅ User Session Remove करें
     return redirect(url_for('login'))
 
 # ✅ Flask App Run करें (Render के लिए सही Config)
 if __name__ == '__main__':
+    init_db()  # ✅ जब Flask ऐप स्टार्ट होगी, तो Database भी Initialize होगा
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 10000)), debug=True)
