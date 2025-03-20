@@ -25,7 +25,7 @@ def signup():
 
             return redirect(url_for('login'))
 
-        return render_templates('signup.html')  # ✅ `/templates/signup.html` होना चाहिए
+        return render_template('signup.html')  # ✅ `/templates/signup.html` होना चाहिए
     except Exception as e:
         return f"Error loading signup page: {e}"  # ✅ अगर Error आए तो दिखाए
 
@@ -33,7 +33,7 @@ def signup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     try:
-        return render_templates('login.html')  # ✅ `/templates/login.html` होना चाहिए
+        return render_template('login.html')  # ✅ `/templates/login.html` होना चाहिए
     except Exception as e:
         return f"Error loading login page: {e}"
 
@@ -44,7 +44,7 @@ def upload():
         return redirect(url_for('login'))
 
     try:
-        return render_templates('upload.html')  # ✅ `/templates/upload.html` होना चाहिए
+        return render_template('upload.html')  # ✅ `/templates/upload.html` होना चाहिए
     except Exception as e:
         return f"Error loading upload page: {e}"
 
