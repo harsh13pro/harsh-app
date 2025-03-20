@@ -6,7 +6,11 @@ app = Flask(__name__, template_folder=os.path.abspath('templates'))
 app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')
 
 # ✅ `/` Route (GET और HEAD दोनों सपोर्ट)
-
+@app.route('/', methods=['GET', 'HEAD'])
+def home():
+    if request.method == 'HEAD':
+        return '', 200  
+    return redirect(url_for('signup'))  # ✅ `/signup` पर रीडायरेक्ट
 
 # ✅ Signup Route
 @app.route('/signup', methods=['GET', 'POST'])
@@ -21,7 +25,7 @@ def signup():
 
             return redirect(url_for('login'))
 
-        return render_template('signup.html')  # ✅ `/templates/signup.html` होना चाहिए
+        return render_templates('signup.html')  # ✅ `/templates/signup.html` होना चाहिए
     except Exception as e:
         return f"Error loading signup page: {e}"  # ✅ अगर Error आए तो दिखाए
 
@@ -29,7 +33,7 @@ def signup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     try:
-        return render_template('login.html')  # ✅ `/templates/login.html` होना चाहिए
+        return render_templates('login.html')  # ✅ `/templates/login.html` होना चाहिए
     except Exception as e:
         return f"Error loading login page: {e}"
 
@@ -40,7 +44,7 @@ def upload():
         return redirect(url_for('login'))
 
     try:
-        return render_template('upload.html')  # ✅ `/templates/upload.html` होना चाहिए
+        return render_templates('upload.html')  # ✅ `/templates/upload.html` होना चाहिए
     except Exception as e:
         return f"Error loading upload page: {e}"
 
