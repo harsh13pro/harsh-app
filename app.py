@@ -6,11 +6,7 @@ app = Flask(__name__, template_folder=os.path.abspath('templates'))
 app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')
 
 # ✅ `/` Route (GET और HEAD दोनों सपोर्ट)
-@app.route('/', methods=['GET', 'HEAD'])
-def home():
-    if request.method == 'HEAD':
-        return '', 200  
-    return redirect(url_for('signup'))  # ✅ `/signup` पर रीडायरेक्ट
+
 
 # ✅ Signup Route
 @app.route('/signup', methods=['GET', 'POST'])
